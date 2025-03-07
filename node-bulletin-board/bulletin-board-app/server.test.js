@@ -1,31 +1,52 @@
 const http = require('http');
-const app = require('./server'); // Import your Express app
+const app = require('./server');
 
 describe('GET /', () => {
   it('responds with the bulletin board welcome message', (done) => {
-    const server = app.listen(0, () => { // Start the server on a random port
+    const server = app.listen(0);
+    const connections = {};
+
+    // Track all connections
+    server.on('connection', (conn) => {
+      const key = `${conn.remoteAddress}:${conn.remotePort}`;
+      connections[key] = conn;
+      conn.on('close', () => {
+        delete connections[key];
+      });
+    });
+
+    server.on('listening', () => {
       const port = server.address().port;
-      http.get(`http://localhost:${port}`, (res) => {
+      const req = http.get(`http://localhost:${port}`, (res) => {
         let data = '';
 
-        // Collect the response data
         res.on('data', (chunk) => {
           data += chunk;
         });
 
-        // Check the response when the request ends
         res.on('end', () => {
           try {
             expect(res.statusCode).toBe(200);
-            expect(data).toContain('Welcome to the Bulletin Board'); // Check for the welcome message
+            expect(data).toContain('Welcome to the Bulletin Board');
             done();
           } catch (error) {
-            done(error); // Pass any errors to Jest
+            done(error);
           } finally {
-            server.close(); // Ensure the server is closed
+            // Close server and destroy connections
+            server.close(() => {
+              Object.values(connections).forEach(conn => conn.destroy());
+            });
           }
         });
       });
+
+      // Handle request errors
+      req.on('error', (err) => {
+        done(err);
+        server.close(() => {
+          Object.values(connections).forEach(conn => conn.destroy());
+        });
+      });
     });
-  }, 10000); // Increase timeout to 10000 ms
+  }, 10000);
 });

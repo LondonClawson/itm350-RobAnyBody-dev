@@ -4,7 +4,7 @@
   "description": "This guide provides a detailed explanation of commonly used Git commands, complete with useful flags and scenarios where each command is applicable.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "jest"
   },
   "author": "",
   "license": "ISC"

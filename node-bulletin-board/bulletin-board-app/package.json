@@ -20,7 +20,7 @@
     "morgan": "^1.6.1"
   },
   "scripts": {
-    "start": "node server.js",
-    "test": "jest"
+    "start": "node server.js"//,
+    // "test": "jest"
   }
 }

@@ -15,10 +15,15 @@ describe('GET /', () => {
 
         // Check the response when the request ends
         res.on('end', () => {
-          expect(res.statusCode).toBe(200);
-          expect(data).toContain('Welcome to the Bulletin Board'); // Check for the welcome message
-          server.close(); // Close the server
-          done();
+          try {
+            expect(res.statusCode).toBe(200);
+            expect(data).toContain('Welcome to the Bulletin Board'); // Check for the welcome message
+            done();
+          } catch (error) {
+            done(error); // Pass any errors to Jest
+          } finally {
+            server.close(); // Ensure the server is closed
+          }
         });
       });
     });
